@@ -1,42 +1,52 @@
-// Person 5 - Frontend/API Integration
-// This file is the ONLY place React talks to the backend.
-// Pages/components must import functions from here, never fetch() directly,
-// and never hard-code case/suspect/evidence data.
+import axios from 'axios';
 
-// TODO: replace with the real API URL from Person 1 (e.g. https://localhost:7285/api)
-const API_BASE_URL = https://localhost:7080/api;
+// REPLACE THIS WITH PERSON 1'S ACTUAL API PORT
+// Check their launchSettings.json or Program.cs
+const BASE_URL = 'http://localhost:7080/api'; 
 
-async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-
-  if (!response.ok) {
-    // let the calling page show a friendly error / loading state
-    throw new Error(`API error ${response.status} on ${path}`);
+/**
+ * Generic GET helper to reduce repetition
+ */
+const get = async (endpoint) => {
+  try {
+    const response = await axios.get(`${BASE_URL}${endpoint}`);
+    return response.data;
+  } catch (error) {
+    // Throw a clean error message for the UI to display
+    throw new Error(error.response?.data?.message || 'Failed to fetch data');
   }
+};
 
-  // some endpoints (e.g. 204) return no body
-  if (response.status === 204) return null;
-  return response.json();
-}
+/**
+ * Fetches a single case by ID. 
+ * Defaults to ID 1 as per the assignment scenario ("The Missing Prototype").
+ */
+export const getCase = async (id = 1) => {
+  return await get(`/cases/${id}`);
+};
 
-export const getCases = () => request("/cases");
-export const getCaseById = (id) => request(`/cases/${id}`);
+/**
+ * Fetches all suspects. Needed for Suspects Page later.
+ */
+export const getSuspects = async () => {
+  return await get('/suspects');
+};
 
-export const getSuspects = () => request("/suspects");
-export const getSuspectById = (id) => request(`/suspects/${id}`);
+/**
+ * Fetches all evidence. Needed for Evidence Page later.
+ */
+export const getEvidence = async () => {
+  return await get('/evidence');
+};
 
-export const getEvidence = () => request("/evidence");
-export const getEvidenceById = (id) => request(`/evidence/${id}`);
-
-export const submitInvestigation = (data) =>
-  request("/investigations", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-
-// Dapper endpoint (Person 1): investigations + suspect names
-export const getInvestigationsWithSuspectNames = () =>
-  request("/investigations/with-suspects");
+/**
+ * Submits the investigation. Needed for Part M.
+ */
+export const submitInvestigation = async (payload) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/investigations`, payload);
+    return response.data;
+  } catch (error) {
+    throw new Error('Submission failed');
+  }
+};
