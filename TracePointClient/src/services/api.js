@@ -1,28 +1,44 @@
 import axios from 'axios';
 
-// CONFIRM PORT WITH PERSON 1. Default is often 5000 or 7xxx.
-const BASE_URL = 'http://localhost:7080/api'; 
+// 1. Get the port from Person 1. Do not guess.
+const BASE_URL = 'http://localhost:5000/api'; 
 
-// Generic GET helper
-const get = async (endpoint) => {
-  const response = await axios.get(`${BASE_URL}${endpoint}`);
-  return response.data;
+// 2. Export EXACTLY what Member 3 imports.
+export const getCase = async () => {
+  // Assignment says "View THE case" (singular scenario).
+  // Hardcoding ID 1 is acceptable here IF the backend only seeds one case.
+  // Better: Ask Person 1 if there's a specific endpoint like /api/cases/current
+  try {
+    const response = await axios.get(`${BASE_URL}/cases/1`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data || 'Failed to load case');
+  }
 };
 
-// --- CASES (Part I) ---
-export const getCases = () => get('/cases');
-export const getCaseById = (id) => get(`/cases/${id}`);
+export const getSuspects = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/suspects`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to load suspects');
+  }
+};
 
-// --- SUSPECTS (Part J) ---
-export const getSuspects = () => get('/suspects');
-export const getSuspectById = (id) => get(`/suspects/${id}`);
+export const getEvidence = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/evidence`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to load evidence');
+  }
+};
 
-// --- EVIDENCE (Part K) ---
-export const getEvidenceList = () => get('/evidence');
-export const getEvidenceById = (id) => get(`/evidence/${id}`);
-
-// --- INVESTIGATION (Part M) ---
-export const submitInvestigation = (payload) => {
-  // Payload shape: { caseId, suspectId, conclusion }
-  return axios.post(`${BASE_URL}/investigations`, payload);
+export const submitInvestigation = async (payload) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/investigations`, payload);
+    return response.data;
+  } catch (error) {
+    throw new Error('Submission failed');
+  }
 };
